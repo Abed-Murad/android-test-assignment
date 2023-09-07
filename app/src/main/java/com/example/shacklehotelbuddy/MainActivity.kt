@@ -3,63 +3,72 @@ package com.example.shacklehotelbuddy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.shacklehotelbuddy.featurs.details.DetailsScreen
+import com.example.shacklehotelbuddy.featurs.details.SearchResultsViewModel
+import com.example.shacklehotelbuddy.featurs.home.HomeViewModel
+import com.example.shacklehotelbuddy.featurs.home.HomeScreen
+import com.example.shacklehotelbuddy.model.SearchQuery
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val homeViewModel: HomeViewModel  by viewModels()
+    private val searchResultsViewModel: SearchResultsViewModel  by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ShackleHotelBuddyTheme {
-               MainScreen()
+                InitNavHost()
             }
         }
     }
-}
 
-@Composable
-fun MainScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .paint(
-                painterResource(id = R.drawable.background),
-                contentScale = ContentScale.FillWidth
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .border(width = 2.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .padding(16.dp)
+    @Composable
+    private fun InitNavHost() {
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = HOME_SCREEN_ROUTE
         ) {
-            Text(
-                text = "Hello!",
-                style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                color = ShackleHotelBuddyTheme.colors.grayText
-            )
-        }
-    }
-}
+            composable(route = HOME_SCREEN_ROUTE) {
+                val gson: Gson = GsonBuilder().create()
+                val searchQueryGson = gson.toJson(homeViewModel.getSearchQuery())
+                HomeScreen(
+                    viewModel = homeViewModel,
+                    onSearchButtonClicked = {
+                        navController.navigate(SEARCH_RESULTS_SCREEN_ROUTE.replace(
+                            "{searchQuery}", searchQueryGson
+                        ))
+                    },
+                    onSearchQuerySelected = {
+                        navController.navigate(SEARCH_RESULTS_SCREEN_ROUTE.replace(
+                            "{searchQuery}", searchQueryGson
+                        ))
+                    })
+            }
+            composable(
+                route = SEARCH_RESULTS_SCREEN_ROUTE,
+            ) {
+                val gson: Gson = GsonBuilder().create()
+                val searchQueryGson = it.arguments?.getString("searchQuery")
+                val searchQuery = gson.fromJson(searchQueryGson, SearchQuery::class.java)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ShackleHotelBuddyTheme {
-        MainScreen()
+                DetailsScreen(
+                    searchResultsViewModel,
+                    navController,
+                    searchQuery
+                )
+            }
+        }
+
     }
 }

@@ -196,6 +196,7 @@ fun HotelName(
 fun HotelCardPreview() {
     HotelDetailsCard(
         Hotel(
+            id = 1,
             "Beverly Hotel",
             "Amsterdam, Netherlands",
             "https://www.ahstatic.com/photos/1276_rodbb_00_p_2048x1536.jpg",
