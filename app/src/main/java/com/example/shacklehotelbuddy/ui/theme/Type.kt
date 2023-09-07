@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Immutable
-data class CustomTypography constructor(
+data class CustomTypography(
     val bodyMedium: TextStyle = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.W400,
