@@ -5,7 +5,6 @@ import com.example.shacklehotelbuddy.model.SearchQuery
 import com.example.shacklehotelbuddy.repo.FakeHotelsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.Date
@@ -17,7 +16,8 @@ import javax.inject.Inject
 data class MyState(val checkInDate: Date = Date(),
                    val checkoutDate: Date = Date(),
                    val adultsCount:Int = 1,
-                   val childrenCount:Int = 0)
+                   val childrenCount:Int = 0,
+                    val searchHistory: List<SearchQuery> = emptyList())
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val repository: FakeHotelsRepository) : ViewModel() {
@@ -25,11 +25,7 @@ class HomeViewModel @Inject constructor(private val repository: FakeHotelsReposi
     private val _uiState = MutableStateFlow(MyState())
     val uiState = _uiState.asStateFlow()
 
-    private var _searchHistory = MutableStateFlow(emptyList<SearchQuery>())
-    val searchHistory: StateFlow<List<SearchQuery>> = _searchHistory
 
-
-    
     fun getSearchQuery() = SearchQuery(
         id = Random().nextInt(),
         checkInDate =  uiState.value.checkInDate,
@@ -73,7 +69,11 @@ class HomeViewModel @Inject constructor(private val repository: FakeHotelsReposi
     }
 
     suspend fun getSearchHistory() {
-        _searchHistory.value = repository.getSearchHistory()
+        _uiState.update { currentState ->
+            currentState.copy(
+                searchHistory = repository.getSearchHistory()
+            )
+        }
     }
 
 }

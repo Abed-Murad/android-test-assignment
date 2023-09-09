@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.shacklehotelbuddy.R
 import com.example.shacklehotelbuddy.model.SearchQuery
+import com.example.shacklehotelbuddy.repo.fakeSearchQuires
 import com.example.shacklehotelbuddy.toReadableString
 import com.example.shacklehotelbuddy.ui.components.SearchQueryItem
 import kotlinx.coroutines.launch
@@ -60,8 +61,8 @@ import java.util.Date
 fun HomeScreen(
     viewModel: HomeViewModel,
     onSearchButtonClicked: () -> Unit,
-    onSearchQuerySelected:(SearchQuery) -> Unit
-    ) {
+    onSearchQuerySelected: (SearchQuery) -> Unit
+) {
 
 
     val scope = rememberCoroutineScope()
@@ -72,14 +73,31 @@ fun HomeScreen(
         }
     }
 
-    HomeScreenLayout(onSearchButtonClicked, viewModel, onSearchQuerySelected)
+    val uiState by viewModel.uiState.collectAsState()
+    HomeScreenLayout(
+        uiState = uiState,
+        onSearchButtonClicked = {
+            viewModel.addSearchQuery(viewModel.getSearchQuery())
+            onSearchButtonClicked()
+        },
+        onCheckInDateUpdated = { date -> viewModel.updateCheckInDate(date)},
+        onCheckoutDateUpdated = { date -> viewModel.updateCheckoutDate(date)},
+        onAdultsCountUpdated = { adultsCount -> viewModel.updateAdultsCount(adultsCount)},
+        onChildrenCountUpdated = { childrenCount -> viewModel.updateChildrenCount(childrenCount)}
+    ) { searchQuery -> onSearchQuerySelected(searchQuery) }
 }
 
 
 @Composable
-fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel, onSearchQuerySelected:(SearchQuery) -> Unit) {
-    val uiState by viewModel.uiState.collectAsState()
-
+fun HomeScreenLayout(
+    uiState: MyState,
+    onSearchButtonClicked: () -> Unit,
+    onCheckInDateUpdated: (Date) -> Unit,
+    onCheckoutDateUpdated: (Date) -> Unit,
+    onAdultsCountUpdated: (Int) -> Unit,
+    onChildrenCountUpdated: (Int) -> Unit,
+    onSearchQuerySelected: (SearchQuery) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -114,7 +132,7 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
                             DatePickButton(
                                 selectedDate = uiState.checkInDate,
                                 onDateSelected = {
-                                    viewModel.updateCheckInDate(it)
+                                    onCheckInDateUpdated(it)
                                 },
                                 modifier = Modifier
                                     .weight(1f)
@@ -135,7 +153,7 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
                             DatePickButton(
                                 selectedDate = uiState.checkoutDate,
                                 onDateSelected = {
-                                    viewModel.updateCheckoutDate(it)
+                                    onCheckoutDateUpdated(it)
                                 },
                                 modifier = Modifier.weight(1f)
                             )
@@ -152,7 +170,7 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
 
                             InputField(
                                 uiState.adultsCount,
-                                onCountChange = { viewModel.updateAdultsCount(it) },
+                                onCountChange = { onAdultsCountUpdated(it) },
                                 Modifier.weight(1f)
                             )
 
@@ -170,7 +188,7 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
 
                             InputField(
                                 uiState.childrenCount,
-                                onCountChange = { viewModel.updateChildrenCount(it) },
+                                onCountChange = { onChildrenCountUpdated(it) },
                                 Modifier.weight(1f)
                             )
 
@@ -189,12 +207,9 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
                 )
             )
 
-            val searchHistory by viewModel.searchHistory.collectAsState()
-
-            RecentSearchesList(searchHistory, onSearchQuerySelected)
+            RecentSearchesList(uiState.searchHistory, onSearchQuerySelected)
             Button(
                 onClick = {
-                    viewModel.addSearchQuery(viewModel.getSearchQuery())
                     onSearchButtonClicked()
                 },
                 modifier = Modifier
@@ -209,17 +224,23 @@ fun HomeScreenLayout(onSearchButtonClicked: () -> Unit, viewModel: HomeViewModel
 }
 
 @Composable
-fun RecentSearchesList(searchHistory: List<SearchQuery>, onSearchQuerySelected: (SearchQuery) -> Unit ) {
+fun RecentSearchesList(
+    searchHistory: List<SearchQuery>,
+    onSearchQuerySelected: (SearchQuery) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.height(180.dp),
         verticalArrangement = Arrangement.spacedBy(-16.dp),
-        ) {
+    ) {
         items(items = searchHistory, itemContent = { item ->
-            SearchQueryItem(modifier = Modifier.padding(16.dp), searchQuery = item, onSearchQuerySelected)
+            SearchQueryItem(
+                modifier = Modifier.padding(16.dp),
+                searchQuery = item,
+                onSearchQuerySelected
+            )
         })
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -232,7 +253,7 @@ fun InputField(
     TextField(
         value = initialValue.toString(),
         maxLines = 1,
-        onValueChange = { onCountChange(it.toIntOrNull()?: 0) },
+        onValueChange = { onCountChange(it.toIntOrNull() ?: 0) },
         modifier = modifier,
         colors = TextFieldDefaults.textFieldColors(
             disabledTextColor = Color.Transparent,
@@ -246,7 +267,11 @@ fun InputField(
 
 
 @Composable
-fun DatePickButton(selectedDate: Date, onDateSelected: (Date) -> Unit, modifier: Modifier = Modifier) {
+fun DatePickButton(
+    selectedDate: Date,
+    onDateSelected: (Date) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     val year = calendar[Calendar.YEAR]
@@ -303,7 +328,8 @@ fun CheckInDateLabel(
     Row(
         Modifier
             .padding(16.dp)
-            .height(20.dp)) {
+            .height(20.dp)
+    ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = "",
@@ -323,12 +349,16 @@ fun CheckInDateLabel(
 
 @Preview
 @Composable
-fun PreviewItems() {
-    Column {
-        CheckInDateLabel(label = "Checking", icon = R.drawable.manage_history)
-        HeadLine()
-    }
-
+fun HomeScreenLayoutPreview() {
+    val uiState = MyState(searchHistory = fakeSearchQuires)
+    HomeScreenLayout(
+        uiState = uiState,
+        onSearchButtonClicked = {},
+        onCheckInDateUpdated = {},
+        onCheckoutDateUpdated = {},
+        onAdultsCountUpdated = {},
+        onChildrenCountUpdated = {}
+    ) {}
 }
 
 
