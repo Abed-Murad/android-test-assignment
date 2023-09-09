@@ -4,7 +4,7 @@ import com.example.shacklehotelbuddy.model.Hotel
 import com.example.shacklehotelbuddy.model.SearchQuery
 import java.util.Date
 
-val listOfHotels = listOf(
+val fakeListOfHotels = listOf(
     Hotel(1, "The Ritz-Carlton", "New York City", "https://picsum.photos/500/300", 4.5, 500.0),
     Hotel(2, "The Peninsula", "San Francisco", "https://picsum.photos/500/300", 4.8, 450.0),
     Hotel(3, "The Four Seasons", "Los Angeles", "https://picsum.photos/500/300", 4.9, 400.0),

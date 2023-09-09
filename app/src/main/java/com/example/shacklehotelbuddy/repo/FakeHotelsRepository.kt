@@ -16,7 +16,7 @@ class FakeHotelsRepository(
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     suspend fun getHotelsList(searchQuery: SearchQuery): List<Hotel> {
 //        return apiService.getHotelsList()
-        return listOfHotels
+        return fakeListOfHotels
     }
 
     fun addSearchQuery(searchQuery: SearchQuery) {

@@ -31,14 +31,18 @@ import androidx.navigation.compose.rememberNavController
 import com.example.shacklehotelbuddy.R
 import com.example.shacklehotelbuddy.model.Hotel
 import com.example.shacklehotelbuddy.model.SearchQuery
-import com.example.shacklehotelbuddy.repo.listOfHotels
+import com.example.shacklehotelbuddy.repo.fakeListOfHotels
 import com.example.shacklehotelbuddy.ui.components.HotelDetailsCard
 import com.example.shacklehotelbuddy.ui.icons.Icons
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun DetailsScreen(viewModel: SearchResultsViewModel, navController: NavController, searchQuery:SearchQuery) {
+fun DetailsScreen(
+    viewModel: SearchResultsViewModel,
+    navController: NavController,
+    searchQuery: SearchQuery
+) {
 
     val scope = rememberCoroutineScope()
 
@@ -72,16 +76,18 @@ fun SearchDetailsLayout(navController: NavController, hotels: List<Hotel>) {
 
 @Composable
 fun SearchResultsList(hotels: List<Hotel>) {
-        LazyColumn(modifier = Modifier
+    LazyColumn(
+        modifier = Modifier
             .wrapContentHeight()
             .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(items = hotels, itemContent = { item ->
-                HotelDetailsCard(item)
-            })
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(items = hotels, itemContent = { item ->
+            HotelDetailsCard(item)
+        })
     }
 }
+
 @Composable
 private fun SearchResultsTopBar(
     modifier: Modifier = Modifier,
@@ -99,21 +105,23 @@ private fun SearchResultsTopBar(
                 ),
             )
         }
-        Text(text = stringResource(R.string.search_results),
+        Text(
+            text = stringResource(R.string.search_results),
             fontSize = 18.sp,
             lineHeight = 20.sp,
             color = Color(0xFF000000),
-            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
+        )
     }
 }
 
-@Preview(name = "phone")
+@Preview()
 @Composable
 fun SearchDetailsScreenPreview() {
-    val hotels = listOfHotels
+    val fakeListOfHotels = fakeListOfHotels
     SearchDetailsLayout(
         navController = rememberNavController(),
-        hotels = hotels
+        hotels = fakeListOfHotels
     )
 }
 
