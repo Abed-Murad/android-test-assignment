@@ -14,7 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.shacklehotelbuddy.R
+import com.example.shacklehotelbuddy.featurs.home.RecentSearchesList
 import com.example.shacklehotelbuddy.model.SearchQuery
+import com.example.shacklehotelbuddy.repo.fakeSearchQuires
 import com.example.shacklehotelbuddy.toReadableString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +61,9 @@ fun SearchQueryItem(
 @Preview
 @Composable
 fun SearchQueryItemPreview() {
-//    RecentSearchesList(searchHistory)
+    RecentSearchesList(
+        fakeSearchQuires,
+        {}
+    )
 }
 
