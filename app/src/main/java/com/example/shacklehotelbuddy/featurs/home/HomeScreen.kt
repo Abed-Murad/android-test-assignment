@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -111,19 +112,15 @@ fun HomeScreenLayout(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .wrapContentHeight(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
 
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-
+                Column(modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Absolute.SpaceEvenly
                     ) {
                         CheckInDateLabel(
                             label = stringResource(id = R.string.check_in_date),
