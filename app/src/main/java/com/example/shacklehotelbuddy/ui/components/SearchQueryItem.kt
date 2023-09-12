@@ -62,8 +62,9 @@ fun SearchQueryItem(
 @Composable
 fun SearchQueryItemPreview() {
     RecentSearchesList(
-        fakeSearchQuires,
-        {}
+        modifier = Modifier,
+        searchHistory = fakeSearchQuires,
+        onSearchQuerySelected = {}
     )
 }
 

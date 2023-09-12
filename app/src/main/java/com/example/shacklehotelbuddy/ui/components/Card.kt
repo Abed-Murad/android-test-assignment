@@ -1,6 +1,7 @@
 package com.example.shacklehotelbuddy.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,12 +45,16 @@ import kotlin.math.roundToInt
 @Composable
 fun HotelDetailsCard(
     hotelDetails: Hotel,
+    onCLick: (Hotel)-> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
-        Column {
+        Column (
+            Modifier
+                .clickable(onClick = {onCLick(hotelDetails)})
+                .fillMaxWidth()){
             if (hotelDetails.imageUrl.isNotEmpty()) {
                 Row {
                     HotelImage(hotelDetails.imageUrl)
@@ -195,7 +200,7 @@ fun HotelName(
 @Composable
 fun HotelCardPreview() {
     HotelDetailsCard(
-        Hotel(
+        hotelDetails = Hotel(
             id = 1,
             "Beverly Hotel",
             "Amsterdam, Netherlands",
@@ -203,6 +208,7 @@ fun HotelCardPreview() {
             4.5,
             100.0
         ),
+        onCLick = {}
     )
 }
 

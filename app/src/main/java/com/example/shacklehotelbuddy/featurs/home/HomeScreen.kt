@@ -13,12 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.shacklehotelbuddy.R
 import com.example.shacklehotelbuddy.model.SearchQuery
 import com.example.shacklehotelbuddy.repo.fakeSearchQuires
@@ -73,8 +75,7 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    HomeScreenLayout(
-        uiState = uiState,
+    HomeScreenLayout(uiState = uiState,
         onSearchButtonClicked = {
             viewModel.addSearchQuery(viewModel.getSearchQuery())
             onSearchButtonClicked()
@@ -82,8 +83,11 @@ fun HomeScreen(
         onCheckInDateUpdated = { date -> viewModel.updateCheckInDate(date) },
         onCheckoutDateUpdated = { date -> viewModel.updateCheckoutDate(date) },
         onAdultsCountUpdated = { adultsCount -> viewModel.updateAdultsCount(adultsCount) },
-        onChildrenCountUpdated = { childrenCount -> viewModel.updateChildrenCount(childrenCount) }
-    ) { searchQuery -> onSearchQuerySelected(searchQuery) }
+        onChildrenCountUpdated = { childrenCount -> viewModel.updateChildrenCount(childrenCount) }) { searchQuery ->
+        onSearchQuerySelected(
+            searchQuery
+        )
+    }
 }
 
 
@@ -98,120 +102,142 @@ fun HomeScreenLayout(
     onSearchQuerySelected: (SearchQuery) -> Unit
 ) {
 
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
             .paint(
-                painterResource(id = R.drawable.background),
-                contentScale = ContentScale.FillWidth
-            ),
+                painterResource(id = R.drawable.background), contentScale = ContentScale.FillWidth
+            )
+            .verticalScroll(rememberScrollState())
     ) {
-        Column {
-            HeadLine(modifier = Modifier.padding(top = 110.dp, start = 16.dp, end = 16.dp))
-            Card(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ConstraintLayout {
+                val (header, searchBox, searchHistoryTitle, searchHistoryList, searchButton) = createRefs()
 
-            ) {
-                Column(modifier = Modifier.fillMaxWidth(),
+                HeadLine(modifier = Modifier
+                    .padding(top = 110.dp, start = 16.dp, end = 16.dp)
+                    .constrainAs(header) {
+                        top.linkTo(parent.top)
+                    })
+                Card(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .constrainAs(searchBox) {
+                            top.linkTo(header.bottom)
+                        }, elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Absolute.SpaceEvenly
                     ) {
-                        CheckInDateLabel(
-                            label = stringResource(id = R.string.check_in_date),
-                            icon = R.drawable.event_upcoming,
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(.5f),
-                        )
-                        DatePickButton(
-                            selectedDate = uiState.checkInDate,
-                            onDateSelected = {
-                                onCheckInDateUpdated(it)
-                            },
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(.5f),
-                        )
-                    }
-                    Row(Modifier.fillMaxWidth()) {
-                        CheckInDateLabel(
-                            label = stringResource(R.string.check_out_date),
-                            icon = R.drawable.event_available,
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(.5f),
-                        )
-                        DatePickButton(
-                            selectedDate = uiState.checkInDate,
-                            onDateSelected = {
-                                onCheckoutDateUpdated(it)
-                            },
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(.5f),
-                        )
-                    }
-                    Row(Modifier.fillMaxWidth()) {
-                        CheckInDateLabel(
-                            label = stringResource(R.string.adults), icon = R.drawable.person,
-                            modifier = Modifier
-                                .weight(.5f)
-                                .padding(start = 16.dp)
-                                .align(Alignment.CenterVertically),
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Absolute.SpaceEvenly
+                        ) {
+                            CheckInDateLabel(
+                                label = stringResource(id = R.string.check_in_date),
+                                icon = R.drawable.event_upcoming,
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .weight(.5f),
+                            )
+                            DatePickButton(
+                                selectedDate = uiState.checkInDate,
+                                onDateSelected = {
+                                    onCheckInDateUpdated(it)
+                                },
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .weight(.5f),
+                            )
+                        }
+                        Row(Modifier.fillMaxWidth()) {
+                            CheckInDateLabel(
+                                label = stringResource(R.string.check_out_date),
+                                icon = R.drawable.event_available,
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .weight(.5f),
+                            )
+                            DatePickButton(
+                                selectedDate = uiState.checkInDate,
+                                onDateSelected = {
+                                    onCheckoutDateUpdated(it)
+                                },
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .weight(.5f),
+                            )
+                        }
+                        Row(Modifier.fillMaxWidth()) {
+                            CheckInDateLabel(
+                                label = stringResource(R.string.adults), icon = R.drawable.person,
+                                modifier = Modifier
+                                    .weight(.5f)
+                                    .padding(start = 16.dp)
+                                    .align(Alignment.CenterVertically),
+                            )
 
-                        InputField(
-                            uiState.adultsCount,
-                            onCountChange = { onAdultsCountUpdated(it) },
-                            Modifier.weight(.5f)
-                        )
-                    }
-                    Row(Modifier.fillMaxWidth()) {
-                        CheckInDateLabel(
-                            label = stringResource(R.string.children),
-                            icon = R.drawable.supervisor_account,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 16.dp)
-                                .align(Alignment.CenterVertically),
-                        )
+                            InputField(
+                                modifier = Modifier.weight(.5f),
+                                onCountChange = { onAdultsCountUpdated(it) },
+                                initialValue = uiState.adultsCount,
 
-                        InputField(
-                            uiState.childrenCount,
-                            onCountChange = { onChildrenCountUpdated(it) },
-                            Modifier.weight(1f)
-                        )
+                                )
+                        }
+                        Row(Modifier.fillMaxWidth()) {
+                            CheckInDateLabel(
+                                label = stringResource(R.string.children),
+                                icon = R.drawable.supervisor_account,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 16.dp)
+                                    .align(Alignment.CenterVertically),
+                            )
+
+                            InputField(
+                                modifier = Modifier.weight(1f),
+                                onCountChange = { onChildrenCountUpdated(it) },
+                                initialValue = uiState.childrenCount,
+                            )
+                        }
+
                     }
 
                 }
-
-            }
-            Text(
-                modifier = Modifier.padding(start = 16.dp),
-                text = stringResource(R.string.recent_searches),
-                style = TextStyle(
-                    fontSize = 22.sp,
-                    lineHeight = 48.4.sp,
-                    color = Color(0xFFFFFFFF),
+                Text(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .constrainAs(searchHistoryTitle) {
+                            top.linkTo(searchBox.bottom)
+                        }, text = stringResource(R.string.recent_searches), style = TextStyle(
+                        fontSize = 22.sp,
+                        lineHeight = 48.4.sp,
+                        color = Color(0xFFFFFFFF),
+                    )
                 )
-            )
-            RecentSearchesList(uiState.searchHistory, onSearchQuerySelected)
-            Button(
-                onClick = {
-                    onSearchButtonClicked()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = stringResource(R.string.search))
+                RecentSearchesList(modifier = Modifier.constrainAs(searchHistoryList) {
+                    top.linkTo(searchHistoryTitle.bottom)
+                }, uiState.searchHistory, onSearchQuerySelected)
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .constrainAs(searchButton) {
+                            top.linkTo(searchHistoryList.bottom)
+                            bottom.linkTo(parent.bottom)
+                        },
+                    onClick = {
+                        onSearchButtonClicked()
+                    },
+                ) {
+                    Text(text = stringResource(R.string.search))
+                }
             }
+
         }
     }
 
@@ -219,41 +245,37 @@ fun HomeScreenLayout(
 
 @Composable
 fun RecentSearchesList(
+    modifier: Modifier = Modifier,
     searchHistory: List<SearchQuery>,
     onSearchQuerySelected: (SearchQuery) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.height(180.dp),
-        verticalArrangement = Arrangement.spacedBy(-16.dp),
+        modifier = modifier.height(200.dp),
+        verticalArrangement = Arrangement.spacedBy((-16).dp),
     ) {
         items(items = searchHistory, itemContent = { item ->
             SearchQueryItem(
-                modifier = Modifier.padding(16.dp),
-                searchQuery = item,
-                onSearchQuerySelected
+                modifier = Modifier.padding(16.dp), searchQuery = item, onSearchQuerySelected
             )
         })
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputField(
-    initialValue: Int,
-    onCountChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier, initialValue: Int, onCountChange: (Int) -> Unit
 ) {
     TextField(
         modifier = modifier,
         value = initialValue.toString(),
         maxLines = 1,
         onValueChange = { onCountChange(it.toIntOrNull() ?: 0) },
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             disabledTextColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
+            disabledIndicatorColor = Color.Transparent,
         ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
@@ -272,8 +294,7 @@ fun DatePickButton(
     val month = calendar[Calendar.MONTH]
     val dayOfMonth = calendar[Calendar.DAY_OF_MONTH]
     val datePicker = DatePickerDialog(
-        context,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+        context, { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
             val myCalendar = Calendar.getInstance()
             myCalendar.set(Calendar.YEAR, selectedYear)
             myCalendar.set(Calendar.MONTH, selectedMonth)
@@ -301,8 +322,7 @@ fun DatePickButton(
 @Composable
 fun HeadLine(modifier: Modifier = Modifier) {
     Text(
-        text = "Select guests, date and time",
-        style = TextStyle(
+        text = "Select guests, date and time", style = TextStyle(
             fontSize = 44.sp,
             lineHeight = 48.4.sp,
             color = Color(0xFFFFFFFF),
@@ -323,11 +343,9 @@ fun CheckInDateLabel(
             contentDescription = "",
         )
         Text(
-            text = label,
-            style = TextStyle(
+            text = label, style = TextStyle(
                 color = Color(0xFF6D6D6D),
-            ),
-            modifier = Modifier.padding(start = 8.dp)
+            ), modifier = Modifier.padding(start = 8.dp)
         )
     }
 }
@@ -337,14 +355,12 @@ fun CheckInDateLabel(
 @Composable
 fun HomeScreenLayoutPreview() {
     val uiState = MyState(searchHistory = fakeSearchQuires)
-    HomeScreenLayout(
-        uiState = uiState,
+    HomeScreenLayout(uiState = uiState,
         onSearchButtonClicked = {},
         onCheckInDateUpdated = {},
         onCheckoutDateUpdated = {},
         onAdultsCountUpdated = {},
-        onChildrenCountUpdated = {}
-    ) {}
+        onChildrenCountUpdated = {}) {}
 }
 
 

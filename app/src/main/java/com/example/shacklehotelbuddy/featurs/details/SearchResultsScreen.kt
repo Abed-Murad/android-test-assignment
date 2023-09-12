@@ -83,7 +83,9 @@ fun SearchResultsList(hotels: List<Hotel>) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(items = hotels, itemContent = { item ->
-            HotelDetailsCard(item)
+            HotelDetailsCard(hotelDetails = item, onCLick = {
+
+            })
         })
     }
 }
